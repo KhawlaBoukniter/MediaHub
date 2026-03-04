@@ -16,10 +16,11 @@ import java.time.LocalDate;
 public class Subscription {
     @Id
     @GeneratedValue
-    Long id;
+    private Long id;
 
-    Long userId;
-    LocalDate startDate;
-    LocalDate endDate;
-    String status;
+    private Long userId;
+    private Long mediaId;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String status;
 }
