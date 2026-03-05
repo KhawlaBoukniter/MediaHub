@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  subscription-db:
+    image: postgres:15
+    container_name: subscription-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=subscription_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  subscription-service:
+    build: .
+    container_name: subscription-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - subscription-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://subscription-db:5432/subscription_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
