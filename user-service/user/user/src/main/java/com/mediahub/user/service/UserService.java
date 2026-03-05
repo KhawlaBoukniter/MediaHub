@@ -2,7 +2,7 @@ package com.mediahub.user.service;
 
 import java.util.List;
 
-import com.mediahub.user.Dto.UserDto;
+import com.mediahub.user.dto.UserDto;
 
 public interface UserService {
     UserDto CreeUser(UserDto dto);

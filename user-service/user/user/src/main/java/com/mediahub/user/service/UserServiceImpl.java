@@ -5,11 +5,10 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.mediahub.user.Dto.UserDto;
-import com.mediahub.user.Mapper.UserMapper;
-import com.mediahub.user.Repository.UserRepository;
-import com.mediahub.user.Model.User;
-
+import com.mediahub.user.dto.UserDto;
+import com.mediahub.user.mapper.UserMapper;
+import com.mediahub.user.model.User;
+import com.mediahub.user.repository.UserRepository;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;

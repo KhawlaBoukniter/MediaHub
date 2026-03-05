@@ -1,6 +1,5 @@
-package com.mediahub.user.Dto;
+package com.mediahub.user.dto;
 
-import javax.management.relation.Role;
-
+import com.mediahub.user.enums.Role;
 public record UserDto(String username , String email , String password , Role role) {
 } 

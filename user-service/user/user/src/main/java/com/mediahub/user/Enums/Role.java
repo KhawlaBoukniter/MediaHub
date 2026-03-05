@@ -1,4 +1,4 @@
-package com.mediahub.user.Enums;
+package com.mediahub.user.enums;
 
 public enum Role {
     ADMIN,
