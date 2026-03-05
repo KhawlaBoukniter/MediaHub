@@ -1,6 +1,6 @@
-package com.mediahub.user.model;
+package com.mediahub.user.Model;
 
-import com.mediahub.user.enums.Role;
+import com.mediahub.user.Enums.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

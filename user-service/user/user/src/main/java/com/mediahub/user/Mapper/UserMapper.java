@@ -1,8 +1,8 @@
-package com.mediahub.user.mapper;
+package com.mediahub.user.Mapper;
 import org.mapstruct.Mapper;
 
-import com.mediahub.user.dto.UserDto;
-import com.mediahub.user.model.User;
+import com.mediahub.user.Dto.UserDto;
+import com.mediahub.user.Model.User;
 
 @Mapper(componentModel = "spring")   
 public interface UserMapper {
