@@ -3,8 +3,10 @@ package org.subscription.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.subscription.client.MediaClient;
 import org.subscription.client.UserClient;
+import org.subscription.dto.MediaDTO;
 import org.subscription.model.Subscription;
 import org.subscription.repository.SubscriptionRepository;
 
@@ -17,6 +19,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserClient userClient;
     private final MediaClient mediaClient;
+    private final WebClient.Builder webClientBuilder;
 
     @Transactional
     public Subscription createSubscription(Long userId, Long mediaId) {
@@ -40,6 +43,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         sub.setStatus("ACTIF");
 
         return subscriptionRepository.save(sub);
+    }
+
+    @Override
+    public String getSubscriptionDetails(Long id) {
+        Subscription sub = subscriptionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Abonnement introuvable"));
+
+        MediaDTO media = webClientBuilder.build()
+                .get()
+                .uri("http://media-service/media/" + sub.getMediaId())
+                .retrieve()
+                .bodyToMono(MediaDTO.class)
+                .block();
+
+        return "Abonnement " + sub.getStatus() + " pour le média : " + (media != null ? media.getTitle() : "Inconnu");
     }
 
     public List<Subscription> getAllSubscriptions() {
