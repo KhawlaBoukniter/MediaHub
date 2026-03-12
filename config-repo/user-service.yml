@@ -1,0 +1,9 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-user:5432/mediahub_users
+    username: mediahub
+    password: mediahub
+    driver-class-name: org.postgresql.Driver

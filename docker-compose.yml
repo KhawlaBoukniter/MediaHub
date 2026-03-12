@@ -1,0 +1,166 @@
+services:
+
+  # ── Databases ──────────────────────────────────────────────
+
+  postgres-user:
+    image: postgres:16-alpine
+    container_name: postgres-user
+    environment:
+      POSTGRES_DB: mediahub_users
+      POSTGRES_USER: mediahub
+      POSTGRES_PASSWORD: mediahub
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata-user:/var/lib/postgresql/data
+    networks:
+      - mediahub-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U mediahub -d mediahub_users" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-media:
+    image: postgres:16-alpine
+    container_name: postgres-media
+    environment:
+      POSTGRES_DB: mediahub_media
+      POSTGRES_USER: mediahub
+      POSTGRES_PASSWORD: mediahub
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata-media:/var/lib/postgresql/data
+    networks:
+      - mediahub-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U mediahub -d mediahub_media" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-subscription:
+    image: postgres:16-alpine
+    container_name: postgres-subscription
+    environment:
+      POSTGRES_DB: mediahub_subscriptions
+      POSTGRES_USER: mediahub
+      POSTGRES_PASSWORD: mediahub
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata-subscription:/var/lib/postgresql/data
+    networks:
+      - mediahub-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U mediahub -d mediahub_subscriptions" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Infrastructure Services ────────────────────────────────
+
+  discovery-server:
+    build:
+      context: .
+      dockerfile: discovery-server/Dockerfile
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - mediahub-network
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8761/actuator/health" ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  config-server:
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-repo:/config-repo
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - mediahub-network
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8888/actuator/health" ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  # ── Business Microservices ─────────────────────────────────
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres-user:
+        condition: service_healthy
+    networks:
+      - mediahub-network
+    restart: on-failure
+
+  media-service:
+    build:
+      context: .
+      dockerfile: media-service/Dockerfile
+    container_name: media-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres-media:
+        condition: service_healthy
+    networks:
+      - mediahub-network
+    restart: on-failure
+
+  subscription-service:
+    build:
+      context: .
+      dockerfile: subscription-service/Dockerfile
+    container_name: subscription-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres-subscription:
+        condition: service_healthy
+    networks:
+      - mediahub-network
+    restart: on-failure
+
+volumes:
+  pgdata-user:
+  pgdata-media:
+  pgdata-subscription:
+
+
+networks:
+  mediahub-network:
+    driver: bridge

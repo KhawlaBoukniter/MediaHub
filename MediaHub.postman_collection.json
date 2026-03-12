@@ -1,0 +1,840 @@
+{
+	"info": {
+		"_postman_id": "mediahub-full-collection",
+		"name": "MediaHub - Full API Collection",
+		"description": "Complete API collection for MediaHub microservices platform.\n\nStart order:\n1. docker compose up --build\n2. Wait for all services to register on Eureka (http://localhost:8761)\n3. Run requests in order: Users → Media → Subscriptions → Viewing History",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "USER_SERVICE",
+			"value": "http://localhost:8081"
+		},
+		{
+			"key": "MEDIA_SERVICE",
+			"value": "http://localhost:8082"
+		},
+		{
+			"key": "SUBSCRIPTION_SERVICE",
+			"value": "http://localhost:8083"
+		}
+	],
+	"item": [
+		{
+			"name": "User Service",
+			"item": [
+				{
+					"name": "Create User (ADMIN)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"email\": \"admin@mediahub.com\",\n    \"password\": \"password123\",\n    \"role\": \"ADMIN\"\n}"
+						},
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Create User (USER)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"sara\",\n    \"email\": \"sara@mediahub.com\",\n    \"password\": \"password456\",\n    \"role\": \"USER\"\n}"
+						},
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users/1",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin_updated\",\n    \"email\": \"admin_new@mediahub.com\",\n    \"password\": \"newpassword123\",\n    \"role\": \"ADMIN\"\n}"
+						},
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users/1",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users/3",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users", "3"]
+						}
+					}
+				},
+				{
+					"name": "Get User Subscription (Feign)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users/1/subscription",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users", "1", "subscription"]
+						},
+						"description": "Calls subscription-service via OpenFeign to get the user's active subscription"
+					}
+				},
+				{
+					"name": "Get User Not Found (404)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users/999",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users", "999"]
+						},
+						"description": "Tests 404 error handling"
+					}
+				},
+				{
+					"name": "Create User - Validation Error (400)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"\",\n    \"email\": \"not-an-email\",\n    \"password\": \"ab\"\n}"
+						},
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users"]
+						},
+						"description": "Tests DTO validation - blank username, invalid email, short password"
+					}
+				},
+				{
+					"name": "Create User - Duplicate (409)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"email\": \"other@mediahub.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users"]
+						},
+						"description": "Tests duplicate username handling - returns 409"
+					}
+				}
+			]
+		},
+		{
+			"name": "Media Service",
+			"item": [
+				{
+					"name": "Create Media - FILM",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"The Dark Knight\",\n    \"description\": \"Batman faces the Joker in Gotham City\",\n    \"type\": \"FILM\",\n    \"genre\": \"ACTION\",\n    \"category\": \"Movies\",\n    \"releaseDate\": \"2008-07-18\",\n    \"duration\": 152\n}"
+						},
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media"]
+						}
+					}
+				},
+				{
+					"name": "Create Media - SERIES",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Breaking Bad\",\n    \"description\": \"A chemistry teacher turns to crime\",\n    \"type\": \"SERIES\",\n    \"genre\": \"THRILLER\",\n    \"category\": \"TV Shows\",\n    \"releaseDate\": \"2008-01-20\",\n    \"duration\": 49\n}"
+						},
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media"]
+						}
+					}
+				},
+				{
+					"name": "Create Media - SERIES (SCI_FI)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Stranger Things\",\n    \"description\": \"Kids uncover supernatural mysteries in a small town\",\n    \"type\": \"SERIES\",\n    \"genre\": \"SCI_FI\",\n    \"category\": \"TV Shows\",\n    \"releaseDate\": \"2016-07-15\",\n    \"duration\": 50\n}"
+						},
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media"]
+						}
+					}
+				},
+				{
+					"name": "Create Media - PODCAST",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Joe Rogan Experience\",\n    \"description\": \"Long-form conversations with guests\",\n    \"type\": \"PODCAST\",\n    \"genre\": \"DOCUMENTARY\",\n    \"category\": \"Podcasts\",\n    \"duration\": 180\n}"
+						},
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media"]
+						}
+					}
+				},
+				{
+					"name": "Create Media - FILM (SCI_FI)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Inception\",\n    \"description\": \"Dreams within dreams\",\n    \"type\": \"FILM\",\n    \"genre\": \"SCI_FI\",\n    \"category\": \"Movies\",\n    \"releaseDate\": \"2010-07-16\",\n    \"duration\": 148\n}"
+						},
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media"]
+						}
+					}
+				},
+				{
+					"name": "Create Media - SERIES (COMEDY)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"The Office\",\n    \"description\": \"A mockumentary sitcom about office life\",\n    \"type\": \"SERIES\",\n    \"genre\": \"COMEDY\",\n    \"category\": \"TV Shows\",\n    \"releaseDate\": \"2005-03-24\",\n    \"duration\": 22\n}"
+						},
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media"]
+						}
+					}
+				},
+				{
+					"name": "Get All Media",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media"]
+						}
+					}
+				},
+				{
+					"name": "Get Media by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/1",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Media",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"The Dark Knight (Updated)\",\n    \"description\": \"Batman faces the Joker - Christopher Nolan masterpiece\",\n    \"type\": \"FILM\",\n    \"genre\": \"ACTION\",\n    \"category\": \"Movies\",\n    \"releaseDate\": \"2008-07-18\",\n    \"duration\": 152\n}"
+						},
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/1",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Media",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/1",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "1"]
+						}
+					}
+				},
+				{
+					"name": "Filter by Genre - SCI_FI",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/genre/SCI_FI",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "genre", "SCI_FI"]
+						},
+						"description": "Values: ACTION, COMEDY, DRAMA, HORROR, SCI_FI, DOCUMENTARY, THRILLER, ROMANCE, ANIMATION, FANTASY"
+					}
+				},
+				{
+					"name": "Filter by Genre - ACTION",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/genre/ACTION",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "genre", "ACTION"]
+						}
+					}
+				},
+				{
+					"name": "Filter by Genre - COMEDY",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/genre/COMEDY",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "genre", "COMEDY"]
+						}
+					}
+				},
+				{
+					"name": "Filter by Genre - THRILLER",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/genre/THRILLER",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "genre", "THRILLER"]
+						}
+					}
+				},
+				{
+					"name": "Filter by Type - FILM",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/type/FILM",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "type", "FILM"]
+						},
+						"description": "Values: FILM, SERIES, PODCAST"
+					}
+				},
+				{
+					"name": "Filter by Type - SERIES",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/type/SERIES",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "type", "SERIES"]
+						}
+					}
+				},
+				{
+					"name": "Filter by Type - PODCAST",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/type/PODCAST",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "type", "PODCAST"]
+						}
+					}
+				},
+				{
+					"name": "Filter by Category - Movies",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/category/Movies",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "category", "Movies"]
+						}
+					}
+				},
+				{
+					"name": "Filter by Category - TV Shows",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/category/TV Shows",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "category", "TV Shows"]
+						}
+					}
+				},
+				{
+					"name": "Filter by Category - Podcasts",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/category/Podcasts",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "category", "Podcasts"]
+						}
+					}
+				},
+				{
+					"name": "Search by Title - 'dark'",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/search?title=dark",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "search"],
+							"query": [
+								{
+									"key": "title",
+									"value": "dark"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search by Title - 'the'",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/search?title=the",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "search"],
+							"query": [
+								{
+									"key": "title",
+									"value": "the"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search by Title - 'break'",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/search?title=break",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "search"],
+							"query": [
+								{
+									"key": "title",
+									"value": "break"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Media Not Found (404)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media/999",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media", "999"]
+						},
+						"description": "Tests 404 error handling"
+					}
+				},
+				{
+					"name": "Create Media - Validation Error (400)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"\",\n    \"type\": null,\n    \"genre\": null,\n    \"category\": \"\",\n    \"duration\": -5\n}"
+						},
+						"url": {
+							"raw": "{{MEDIA_SERVICE}}/api/media",
+							"host": ["{{MEDIA_SERVICE}}"],
+							"path": ["api", "media"]
+						},
+						"description": "Tests DTO validation - blank title, null type/genre, negative duration"
+					}
+				}
+			]
+		},
+		{
+			"name": "Subscription Service",
+			"item": [
+				{
+					"name": "Create Subscription - PREMIUM",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1,\n    \"plan\": \"PREMIUM\"\n}"
+						},
+						"url": {
+							"raw": "{{SUBSCRIPTION_SERVICE}}/api/subscriptions",
+							"host": ["{{SUBSCRIPTION_SERVICE}}"],
+							"path": ["api", "subscriptions"]
+						},
+						"description": "Calls user-service via Feign to verify user exists before creating"
+					}
+				},
+				{
+					"name": "Create Subscription - BASIC",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 2,\n    \"plan\": \"BASIC\"\n}"
+						},
+						"url": {
+							"raw": "{{SUBSCRIPTION_SERVICE}}/api/subscriptions",
+							"host": ["{{SUBSCRIPTION_SERVICE}}"],
+							"path": ["api", "subscriptions"]
+						}
+					}
+				},
+				{
+					"name": "Get All Subscriptions",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{SUBSCRIPTION_SERVICE}}/api/subscriptions",
+							"host": ["{{SUBSCRIPTION_SERVICE}}"],
+							"path": ["api", "subscriptions"]
+						}
+					}
+				},
+				{
+					"name": "Get Subscription by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{SUBSCRIPTION_SERVICE}}/api/subscriptions/1",
+							"host": ["{{SUBSCRIPTION_SERVICE}}"],
+							"path": ["api", "subscriptions", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Subscription by User ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{SUBSCRIPTION_SERVICE}}/api/subscriptions/user/1",
+							"host": ["{{SUBSCRIPTION_SERVICE}}"],
+							"path": ["api", "subscriptions", "user", "1"]
+						}
+					}
+				},
+				{
+					"name": "Check Subscription Status",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{SUBSCRIPTION_SERVICE}}/api/subscriptions/user/1/status",
+							"host": ["{{SUBSCRIPTION_SERVICE}}"],
+							"path": ["api", "subscriptions", "user", "1", "status"]
+						},
+						"description": "Returns {subscribed: true/false}"
+					}
+				},
+				{
+					"name": "Get Available Media (Feign)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{SUBSCRIPTION_SERVICE}}/api/subscriptions/user/1/media",
+							"host": ["{{SUBSCRIPTION_SERVICE}}"],
+							"path": ["api", "subscriptions", "user", "1", "media"]
+						},
+						"description": "Calls media-service via Feign - returns full catalog if user has active subscription"
+					}
+				},
+				{
+					"name": "Cancel Subscription",
+					"request": {
+						"method": "PUT",
+						"url": {
+							"raw": "{{SUBSCRIPTION_SERVICE}}/api/subscriptions/1/cancel",
+							"host": ["{{SUBSCRIPTION_SERVICE}}"],
+							"path": ["api", "subscriptions", "1", "cancel"]
+						}
+					}
+				},
+				{
+					"name": "Duplicate Subscription (409)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1,\n    \"plan\": \"BASIC\"\n}"
+						},
+						"url": {
+							"raw": "{{SUBSCRIPTION_SERVICE}}/api/subscriptions",
+							"host": ["{{SUBSCRIPTION_SERVICE}}"],
+							"path": ["api", "subscriptions"]
+						},
+						"description": "Tests duplicate active subscription - returns 409 if user already has one"
+					}
+				}
+			]
+		},
+		{
+			"name": "Viewing History (WebClient)",
+			"item": [
+				{
+					"name": "Add to Viewing History",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mediaId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users/1/history",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users", "1", "history"]
+						}
+					}
+				},
+				{
+					"name": "Add Another to History",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mediaId\": 3\n}"
+						},
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users/1/history",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users", "1", "history"]
+						}
+					}
+				},
+				{
+					"name": "Get User Viewing History",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users/1/history",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users", "1", "history"]
+						}
+					}
+				},
+				{
+					"name": "Get History with Media Details (WebClient)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{USER_SERVICE}}/api/users/1/history/1/details",
+							"host": ["{{USER_SERVICE}}"],
+							"path": ["api", "users", "1", "history", "1", "details"]
+						},
+						"description": "Calls media-service via WebClient (load-balanced) to enrich history entry with full media details"
+					}
+				}
+			]
+		},
+		{
+			"name": "Eureka & Config",
+			"item": [
+				{
+					"name": "Eureka - Registered Apps",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8761/eureka/apps",
+							"host": ["http://localhost:8761"],
+							"path": ["eureka", "apps"]
+						},
+						"description": "Shows all services registered with Eureka"
+					}
+				},
+				{
+					"name": "Config Server - User Service Config",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:8888/user-service/dev",
+							"host": ["http://localhost:8888"],
+							"path": ["user-service", "dev"]
+						},
+						"description": "Shows the resolved configuration for user-service in dev profile"
+					}
+				},
+				{
+					"name": "Config Server - Media Service Config",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:8888/media-service/dev",
+							"host": ["http://localhost:8888"],
+							"path": ["media-service", "dev"]
+						}
+					}
+				},
+				{
+					"name": "Config Server - Subscription Service Config",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:8888/subscription-service/dev",
+							"host": ["http://localhost:8888"],
+							"path": ["subscription-service", "dev"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

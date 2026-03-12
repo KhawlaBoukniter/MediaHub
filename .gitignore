@@ -1,0 +1,28 @@
+# Compiled class files
+**/target/
+
+# IDE files
+**/.idea/
+**/.vscode/
+**/*.iml
+**/.classpath
+**/.project
+**/.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+**/*.log
+
+# Package files
+*.jar
+!**/src/**/
+
+# Docker volumes
+pgdata-*/
+
+# Claude temp files
+tmpclaude-*
+nul

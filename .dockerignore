@@ -1,0 +1,13 @@
+**/target/
+**/.idea/
+**/.vscode/
+**/*.iml
+**/.classpath
+**/.project
+**/.settings/
+**/node_modules/
+**/.git/
+**/*.md
+**/MEDIAHUB.docx
+**/.DS_Store
+**/Thumbs.db
