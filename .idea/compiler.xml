@@ -17,19 +17,19 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="discovery1" />
+        <module name="discovery-server" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="discovery" target="1.5" />
-      <module name="discovery-server" target="17" />
       <module name="discovery-server (1) (com.mediahub)" target="1.5" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="subscription" options="-parameters" />
       <module name="discovery-server" options="-parameters" />
       <module name="discovery1" options="-parameters" />
+      <module name="subscription" options="-parameters" />
     </option>
   </component>
 </project>
