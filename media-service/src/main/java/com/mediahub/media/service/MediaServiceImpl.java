@@ -4,8 +4,8 @@ import com.mediahub.media.dto.MediaRequest;
 import com.mediahub.media.dto.MediaResponse;
 import com.mediahub.media.entity.Genre;
 import com.mediahub.media.entity.Media;
-import com.mediahub.media.entity.MediaType;
 import com.mediahub.media.exception.ResourceNotFoundException;
+import com.mediahub.media.mapper.MediaMapper;
 import com.mediahub.media.repository.MediaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,13 +18,14 @@ import java.util.List;
 public class MediaServiceImpl implements MediaService {
 
     private final MediaRepository mediaRepository;
+    private final MediaMapper mediaMapper;
 
     @Override
     @Transactional(readOnly = true)
     public List<MediaResponse> findAll() {
         return mediaRepository.findAll()
                 .stream()
-                .map(MediaResponse::from)
+                .map(mediaMapper::toResponse)
                 .toList();
     }
 
@@ -33,23 +34,15 @@ public class MediaServiceImpl implements MediaService {
     public MediaResponse findById(Long id) {
         Media media = mediaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Media not found with id: " + id));
-        return MediaResponse.from(media);
+        return mediaMapper.toResponse(media);
     }
 
     @Override
     @Transactional
     public MediaResponse create(MediaRequest request) {
-        Media media = Media.builder()
-                .title(request.title())
-                .description(request.description())
-                .type(request.type())
-                .genre(request.genre())
-                .category(request.category())
-                .releaseDate(request.releaseDate())
-                .duration(request.duration())
-                .build();
+        Media media = mediaMapper.toEntity(request);
         Media saved = mediaRepository.save(media);
-        return MediaResponse.from(saved);
+        return mediaMapper.toResponse(saved);
     }
 
     @Override
@@ -63,11 +56,9 @@ public class MediaServiceImpl implements MediaService {
         existing.setType(request.type());
         existing.setGenre(request.genre());
         existing.setCategory(request.category());
-        existing.setReleaseDate(request.releaseDate());
-        existing.setDuration(request.duration());
 
         Media updated = mediaRepository.save(existing);
-        return MediaResponse.from(updated);
+        return mediaMapper.toResponse(updated);
     }
 
     @Override
@@ -84,7 +75,7 @@ public class MediaServiceImpl implements MediaService {
     public List<MediaResponse> findByCategory(String category) {
         return mediaRepository.findByCategory(category)
                 .stream()
-                .map(MediaResponse::from)
+                .map(mediaMapper::toResponse)
                 .toList();
     }
 
@@ -93,25 +84,8 @@ public class MediaServiceImpl implements MediaService {
     public List<MediaResponse> findByGenre(Genre genre) {
         return mediaRepository.findByGenre(genre)
                 .stream()
-                .map(MediaResponse::from)
+                .map(mediaMapper::toResponse)
                 .toList();
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<MediaResponse> findByType(MediaType type) {
-        return mediaRepository.findByType(type)
-                .stream()
-                .map(MediaResponse::from)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<MediaResponse> search(String title) {
-        return mediaRepository.findByTitleContainingIgnoreCase(title)
-                .stream()
-                .map(MediaResponse::from)
-                .toList();
-    }
 }

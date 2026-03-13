@@ -41,11 +41,6 @@ public class SubscriptionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(subscriptionService.create(request));
     }
 
-    @PutMapping("/{id}/cancel")
-    public ResponseEntity<SubscriptionResponse> cancel(@PathVariable Long id) {
-        return ResponseEntity.ok(subscriptionService.cancel(id));
-    }
-
     @GetMapping("/user/{userId}")
     public ResponseEntity<SubscriptionResponse> getByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(subscriptionService.getByUserId(userId));

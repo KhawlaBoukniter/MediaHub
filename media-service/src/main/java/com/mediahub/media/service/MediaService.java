@@ -3,7 +3,6 @@ package com.mediahub.media.service;
 import com.mediahub.media.dto.MediaRequest;
 import com.mediahub.media.dto.MediaResponse;
 import com.mediahub.media.entity.Genre;
-import com.mediahub.media.entity.MediaType;
 
 import java.util.List;
 
@@ -23,7 +22,4 @@ public interface MediaService {
 
     List<MediaResponse> findByGenre(Genre genre);
 
-    List<MediaResponse> findByType(MediaType type);
-
-    List<MediaResponse> search(String title);
 }

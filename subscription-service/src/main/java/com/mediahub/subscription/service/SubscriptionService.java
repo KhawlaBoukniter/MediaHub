@@ -14,8 +14,6 @@ public interface SubscriptionService {
 
     SubscriptionResponse create(SubscriptionRequest request);
 
-    SubscriptionResponse cancel(Long id);
-
     SubscriptionResponse getByUserId(Long userId);
 
     boolean isUserSubscribed(Long userId);

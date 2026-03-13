@@ -1,6 +1,5 @@
 package com.mediahub.user.controller;
 
-import com.mediahub.user.dto.ViewingHistoryDetailResponse;
 import com.mediahub.user.dto.ViewingHistoryRequest;
 import com.mediahub.user.dto.ViewingHistoryResponse;
 import com.mediahub.user.service.ViewingHistoryService;
@@ -31,14 +30,9 @@ public class ViewingHistoryController {
 
     @PostMapping
     public ResponseEntity<ViewingHistoryResponse> addToHistory(@PathVariable Long userId,
-                                                               @Valid @RequestBody ViewingHistoryRequest request) {
+            @Valid @RequestBody ViewingHistoryRequest request) {
         ViewingHistoryResponse response = viewingHistoryService.addToHistory(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{historyId}/details")
-    public ResponseEntity<ViewingHistoryDetailResponse> getHistoryWithMediaDetails(@PathVariable Long userId,
-                                                                                   @PathVariable Long historyId) {
-        return ResponseEntity.ok(viewingHistoryService.getHistoryWithMediaDetails(userId, historyId));
-    }
 }

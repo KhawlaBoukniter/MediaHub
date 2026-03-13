@@ -1,8 +1,6 @@
 package com.mediahub.user.controller;
 
-import com.mediahub.user.dto.SubscriptionResponse;
-import com.mediahub.user.dto.UserRequest;
-import com.mediahub.user.dto.UserResponse;
+import com.mediahub.user.dto.UserDto;
 import com.mediahub.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,24 +25,24 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> findAll() {
+    public ResponseEntity<List<UserDto>> findAll() {
         return ResponseEntity.ok(userService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<UserDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest request) {
-        UserResponse response = userService.create(request);
+    public ResponseEntity<UserDto> create(@Valid @RequestBody UserDto request) {
+        UserDto response = userService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> update(@PathVariable Long id,
-                                               @Valid @RequestBody UserRequest request) {
+    public ResponseEntity<UserDto> update(@PathVariable Long id,
+            @Valid @RequestBody UserDto request) {
         return ResponseEntity.ok(userService.update(id, request));
     }
 
@@ -54,8 +52,4 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/subscription")
-    public ResponseEntity<SubscriptionResponse> getUserSubscription(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserSubscription(id));
-    }
 }
