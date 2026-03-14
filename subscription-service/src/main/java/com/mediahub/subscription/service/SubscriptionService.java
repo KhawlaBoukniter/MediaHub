@@ -19,4 +19,6 @@ public interface SubscriptionService {
     boolean isUserSubscribed(Long userId);
 
     List<MediaResponse> getAvailableMedia(Long userId);
+
+    void cancelSubscription(Long userId);
 }

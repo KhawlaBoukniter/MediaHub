@@ -88,4 +88,12 @@ public class MediaServiceImpl implements MediaService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<MediaResponse> searchByTitle(String title) {
+        return mediaRepository.findByTitleContainingIgnoreCase(title)
+                .stream()
+                .map(mediaMapper::toResponse)
+                .toList();
+    }
 }

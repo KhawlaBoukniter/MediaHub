@@ -1,12 +1,16 @@
 package com.mediahub.user.service;
 
+import com.mediahub.user.dto.AuthResponse;
+import com.mediahub.user.dto.LoginRequest;
 import com.mediahub.user.dto.UserDto;
 import com.mediahub.user.entity.User;
 import com.mediahub.user.exception.DuplicateResourceException;
 import com.mediahub.user.exception.ResourceNotFoundException;
+import com.mediahub.user.exception.UnauthorizedException;
 import com.mediahub.user.mapper.UserMapper;
 import com.mediahub.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +22,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
     @Transactional(readOnly = true)
@@ -47,6 +53,9 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = userMapper.toEntity(request);
+        // Hash the password
+        user.setPassword(passwordEncoder.encode(request.password()));
+
         if (user.getRole() == null) {
             user.setRole(com.mediahub.user.entity.Role.USER);
         }
@@ -85,6 +94,20 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new UnauthorizedException("Invalid username or password"));
+
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new UnauthorizedException("Invalid username or password");
+        }
+
+        String token = jwtService.generateToken(user.getUsername(), user.getRole().name());
+        return new AuthResponse(token, userMapper.toDto(user));
     }
 
 }

@@ -65,4 +65,9 @@ public class MediaController {
         return ResponseEntity.ok(mediaService.findByGenre(genre));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<MediaResponse>> search(@RequestParam String title) {
+        return ResponseEntity.ok(mediaService.searchByTitle(title));
+    }
+
 }

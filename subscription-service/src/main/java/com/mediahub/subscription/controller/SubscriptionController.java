@@ -8,10 +8,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +43,11 @@ public class SubscriptionController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<SubscriptionResponse> getByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(subscriptionService.getByUserId(userId));
+        try {
+            return ResponseEntity.ok(subscriptionService.getByUserId(userId));
+        } catch (com.mediahub.subscription.exception.ResourceNotFoundException e) {
+            return ResponseEntity.noContent().build();
+        }
     }
 
     @GetMapping("/user/{userId}/status")
@@ -55,5 +59,11 @@ public class SubscriptionController {
     @GetMapping("/user/{userId}/media")
     public ResponseEntity<List<MediaResponse>> getAvailableMedia(@PathVariable Long userId) {
         return ResponseEntity.ok(subscriptionService.getAvailableMedia(userId));
+    }
+
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<Void> cancel(@PathVariable Long userId) {
+        subscriptionService.cancelSubscription(userId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,0 +1,81 @@
+<div class="subscription-container">
+  <div class="header">
+    <h1>Choose Your Plan</h1>
+    <p>Flexible plans for every viewer. Change or cancel anytime.</p>
+  </div>
+
+  @if (isAdmin()) {
+  <div class="admin-banner">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+    <span>**You have Unlimited Admin Access.** No subscription required.</span>
+  </div>
+  }
+
+  @if (error()) {
+  <div class="error-banner">
+    {{ error() }}
+  </div>
+  }
+
+  <div class="plans-grid">
+    @for (plan of plans; track plan.name) {
+    <div class="plan-card" [class.active-plan]="isCurrentPlan(plan.name)" [style.--accent-color]="plan.accent">
+      @if (isCurrentPlan(plan.name)) {
+      <div class="current-badge">Current Plan</div>
+      }
+
+      <div class="plan-header">
+        <span class="plan-name">{{ plan.name }}</span>
+        <div class="plan-price">
+          <span class="currency">$</span>
+          <span class="amount">{{ plan.price }}</span>
+          <span class="period">/mo</span>
+        </div>
+      </div>
+
+      <ul class="features-list">
+        @for (feature of plan.features; track feature) {
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          {{ feature }}
+        </li>
+        }
+      </ul>
+
+      <div class="plan-footer">
+        <button class="subscribe-btn" [disabled]="isLoading() || !!currentSubscription() || isAdmin()"
+          (click)="onSubscribe(plan.name)">
+          @if (isAdmin()) {
+          Included
+          } @else if (isCurrentPlan(plan.name)) {
+          Active
+          } @else {
+          {{ isLoading() ? 'Processing...' : 'Subscribe Now' }}
+          }
+        </button>
+      </div>
+    </div>
+    }
+  </div>
+
+  @if (currentSubscription()) {
+  <div class="subscription-status">
+    <h3>Subscription Details</h3>
+    <div class="status-info">
+      <div class="detail-row">
+        <span>Status: <span class="status-badge">{{ currentSubscription()?.status }}</span></span>
+        <span>Begins: {{ currentSubscription()?.startDate | date }}</span>
+        <span>Renews: {{ currentSubscription()?.endDate | date }}</span>
+        <button class="cancel-link" (click)="onCancel()" *ngIf="currentSubscription() && !isAdmin()">Cancel
+          Subscription</button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

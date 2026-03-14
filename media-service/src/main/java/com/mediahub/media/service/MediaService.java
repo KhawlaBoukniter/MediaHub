@@ -22,4 +22,6 @@ public interface MediaService {
 
     List<MediaResponse> findByGenre(Genre genre);
 
+    List<MediaResponse> searchByTitle(String title);
+
 }

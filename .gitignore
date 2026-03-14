@@ -26,3 +26,6 @@ pgdata-*/
 # Claude temp files
 tmpclaude-*
 nul
+
+*.pdf
+.gitignore

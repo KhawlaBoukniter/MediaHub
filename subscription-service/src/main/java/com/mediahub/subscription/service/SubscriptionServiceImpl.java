@@ -5,15 +5,17 @@ import com.mediahub.subscription.client.UserClient;
 import com.mediahub.subscription.dto.MediaResponse;
 import com.mediahub.subscription.dto.SubscriptionRequest;
 import com.mediahub.subscription.dto.SubscriptionResponse;
+import com.mediahub.subscription.entity.Plan;
 import com.mediahub.subscription.entity.Subscription;
 import com.mediahub.subscription.entity.SubscriptionStatus;
-import com.mediahub.subscription.exception.DuplicateResourceException;
 import com.mediahub.subscription.exception.ResourceNotFoundException;
 import com.mediahub.subscription.exception.ServiceUnavailableException;
 import com.mediahub.subscription.mapper.SubscriptionMapper;
 import com.mediahub.subscription.repository.SubscriptionRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final UserClient userClient;
     private final MediaClient mediaClient;
     private final SubscriptionMapper subscriptionMapper;
+
+    private boolean isCurrentAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -51,22 +59,25 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public SubscriptionResponse create(SubscriptionRequest request) {
         try {
             userClient.getUserById(request.userId());
+        } catch (FeignException.NotFound e) {
+            throw new ResourceNotFoundException("User not found with id: " + request.userId());
         } catch (FeignException e) {
-            throw new ServiceUnavailableException(
-                    "User service is unavailable or user not found with id: " + request.userId());
+            throw new ServiceUnavailableException("User service is currently unavailable.");
         }
 
-        if (subscriptionRepository.existsByUserIdAndStatus(request.userId(), SubscriptionStatus.ACTIVE)) {
-            throw new DuplicateResourceException("User already has an active subscription");
+        Subscription subscription = subscriptionRepository
+                .findByUserIdAndStatus(request.userId(), SubscriptionStatus.ACTIVE)
+                .orElse(null);
+
+        if (subscription == null) {
+            subscription = new Subscription();
+            subscription.setUserId(request.userId());
+            subscription.setStatus(SubscriptionStatus.ACTIVE);
+            subscription.setStartDate(LocalDate.now());
+            subscription.setEndDate(LocalDate.now().plusDays(30));
         }
 
-        Subscription subscription = new Subscription();
-        subscription.setUserId(request.userId());
         subscription.setPlan(request.plan());
-        subscription.setStatus(SubscriptionStatus.ACTIVE);
-        subscription.setStartDate(LocalDate.now());
-        subscription.setEndDate(LocalDate.now().plusDays(30));
-
         Subscription saved = subscriptionRepository.save(subscription);
         return subscriptionMapper.toResponse(saved);
     }
@@ -74,15 +85,22 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional(readOnly = true)
     public SubscriptionResponse getByUserId(Long userId) {
-        Subscription subscription = subscriptionRepository.findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE)
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("No active subscription found for user id: " + userId));
-        return subscriptionMapper.toResponse(subscription);
+        return subscriptionRepository.findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE)
+                .map(subscriptionMapper::toResponse)
+                .orElseGet(() -> {
+                    if (isCurrentAdmin()) {
+                        return new SubscriptionResponse(
+                                0L, userId, Plan.PREMIUM, SubscriptionStatus.ACTIVE,
+                                LocalDate.now(), LocalDate.now().plusYears(100),
+                                java.time.LocalDateTime.now());
+                    }
+                    throw new ResourceNotFoundException("No active subscription found for user id: " + userId);
+                });
     }
 
     @Override
     public boolean isUserSubscribed(Long userId) {
-        return subscriptionRepository.existsByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE);
+        return isCurrentAdmin() || subscriptionRepository.existsByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE);
     }
 
     @Override
@@ -92,5 +110,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             throw new ResourceNotFoundException("No active subscription found for user id: " + userId);
         }
         return mediaClient.getAllMedia();
+    }
+
+    @Override
+    @Transactional
+    public void cancelSubscription(Long userId) {
+        Subscription subscription = subscriptionRepository.findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("No active subscription found for user id: " + userId));
+
+        subscription.setStatus(SubscriptionStatus.CANCELLED);
+        subscriptionRepository.save(subscription);
     }
 }
