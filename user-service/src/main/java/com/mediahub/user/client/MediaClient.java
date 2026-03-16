@@ -4,9 +4,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "subscription-service")
-public interface SubscriptionClient {
+@FeignClient(name = "media-service")
+public interface MediaClient {
 
-    @GetMapping("/api/subscriptions/user/{userId}")
-    Object getSubscriptionByUserId(@PathVariable("userId") Long userId);
+    @GetMapping("/api/media/{id}")
+    Object getMediaById(@PathVariable("id") Long id);
 }
