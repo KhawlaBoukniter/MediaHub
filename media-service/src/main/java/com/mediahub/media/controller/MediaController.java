@@ -45,7 +45,7 @@ public class MediaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<MediaResponse> update(@PathVariable Long id,
-                                                 @Valid @RequestBody MediaRequest request) {
+            @Valid @RequestBody MediaRequest request) {
         return ResponseEntity.ok(mediaService.update(id, request));
     }
 
@@ -65,13 +65,9 @@ public class MediaController {
         return ResponseEntity.ok(mediaService.findByGenre(genre));
     }
 
-    @GetMapping("/type/{type}")
-    public ResponseEntity<List<MediaResponse>> findByType(@PathVariable MediaType type) {
-        return ResponseEntity.ok(mediaService.findByType(type));
-    }
-
     @GetMapping("/search")
     public ResponseEntity<List<MediaResponse>> search(@RequestParam String title) {
-        return ResponseEntity.ok(mediaService.search(title));
+        return ResponseEntity.ok(mediaService.searchByTitle(title));
     }
+
 }
