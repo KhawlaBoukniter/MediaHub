@@ -1,6 +1,6 @@
 package com.mediahub.subscription.client;
 
-import com.mediahub.subscription.dto.UserResponse;
+import com.mediahub.subscription.dto.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface UserClient {
 
     @GetMapping("/api/users/{id}")
-    UserResponse getUserById(@PathVariable Long id);
+    UserDto getUserById(@PathVariable Long id);
 }
