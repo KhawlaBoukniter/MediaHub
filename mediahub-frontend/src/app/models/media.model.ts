@@ -5,6 +5,7 @@ export interface Media {
     id: number;
     title: string;
     description: string;
+    type: string;
     category: string;
     genre: string;
     releaseDate: string;

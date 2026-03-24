@@ -32,9 +32,30 @@ export class MediaService {
     }
 
     /**
-     * Search media by title (assuming backend supports it).
+     * Search media by title.
      */
     searchMedia(query: string): Observable<Media[]> {
-        return this.http.get<Media[]>(`${this.baseUrl}/search?query=${query}`);
+        return this.http.get<Media[]>(`${this.baseUrl}/search?title=${query}`);
+    }
+
+    /**
+     * Create new media (Admin only).
+     */
+    createMedia(media: Partial<Media>): Observable<Media> {
+        return this.http.post<Media>(this.baseUrl, media);
+    }
+
+    /**
+     * Update existing media (Admin only).
+     */
+    updateMedia(id: number, media: Partial<Media>): Observable<Media> {
+        return this.http.put<Media>(`${this.baseUrl}/${id}`, media);
+    }
+
+    /**
+     * Delete media (Admin only).
+     */
+    deleteMedia(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/${id}`);
     }
 }

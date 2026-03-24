@@ -22,12 +22,6 @@ export class SubscriptionService {
         return this.http.post<SubscriptionResponse>(this.apiUrl, request);
     }
 
-    updateStatus(id: number, status: SubscriptionStatus): Observable<SubscriptionResponse> {
-        return this.http.put<SubscriptionResponse>(`${this.apiUrl}/${id}/status`, null, {
-            params: { status }
-        });
-    }
-
     cancelSubscription(userId: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/user/${userId}`);
     }

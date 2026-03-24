@@ -68,13 +68,30 @@
   <div class="subscription-status">
     <h3>Subscription Details</h3>
     <div class="status-info">
-      <div class="detail-row">
-        <span>Status: <span class="status-badge">{{ currentSubscription()?.status }}</span></span>
-        <span>Begins: {{ currentSubscription()?.startDate | date }}</span>
-        <span>Renews: {{ currentSubscription()?.endDate | date }}</span>
-        <button class="cancel-link" (click)="onCancel()" *ngIf="currentSubscription() && !isAdmin()">Cancel
-          Subscription</button>
+      <div class="detail-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; padding: 1.5rem 0;">
+        <div class="detail-item">
+          <span
+            style="color: var(--text-muted); display: block; margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Status</span>
+          <span class="status-badge"
+            style="background: rgba(34, 197, 94, 0.1); color: #4ade80; padding: 0.4rem 1rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">{{
+            currentSubscription()?.status }}</span>
+        </div>
+        <div class="detail-item">
+          <span
+            style="color: var(--text-muted); display: block; margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Begins</span>
+          <span style="color: white; font-weight: 600; font-size: 1rem;">{{ currentSubscription()?.startDate |
+            date:'mediumDate' }}</span>
+        </div>
+        <div class="detail-item">
+          <span
+            style="color: var(--text-muted); display: block; margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Renews</span>
+          <span style="color: white; font-weight: 600; font-size: 1rem;">{{ currentSubscription()?.endDate |
+            date:'mediumDate' }}</span>
+        </div>
       </div>
+      <button class="cancel-link" (click)="onCancel()" *ngIf="currentSubscription() && !isAdmin()"
+        style="margin-top: 1rem;">Cancel Subscription</button>
     </div>
   </div>
   }
